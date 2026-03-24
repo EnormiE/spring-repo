@@ -92,8 +92,7 @@ public class VehicleRepositoryImpl implements IVehicleRepository {
         return false;
     }
 
-    @Override
-    public void save() {
+    private void save() {
         try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("vehicles.csv"))) {
             for (Vehicle v : vehicleList) {
                 writer.println(v.toCSV());
@@ -104,8 +103,7 @@ public class VehicleRepositoryImpl implements IVehicleRepository {
     }
 
 
-    @Override
-    public void load() {
+    private void load() {
         String pathName = "vehicles.csv";
         vehicleList = new ArrayList<>();
         Scanner scanner = null;

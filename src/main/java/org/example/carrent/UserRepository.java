@@ -48,8 +48,7 @@ public class UserRepository implements IUserRepository{
         return true;
     }
 
-    @Override
-    public void save() {
+    private void save() {
         try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("users.csv"))) {
             for (User u : userList) {
                 writer.print(u.getLogin() + ";");
@@ -65,8 +64,7 @@ public class UserRepository implements IUserRepository{
         }
     }
 
-    @Override
-    public void load() {
+    private void load() {
         String pathName = "users.csv";
         userList = new ArrayList<>();
         Scanner scanner = null;
