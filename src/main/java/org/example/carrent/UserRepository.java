@@ -48,6 +48,28 @@ public class UserRepository implements IUserRepository{
         return true;
     }
 
+    @Override
+    public boolean add(User user) {
+        for (User u : userList) {
+            if (Objects.equals(u.getLogin(), user.getLogin())) {
+                return false;
+            }
+        }
+        userList.add(user);
+        save();
+        return true;
+    }
+
+    @Override
+    public boolean remove(User user) {
+        if(user.getRentedVehicleId() != null) {
+            return false;
+        }
+        userList.remove(user);
+        save();
+        return true;
+    }
+
     private void save() {
         try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("users.csv"))) {
             for (User u : userList) {

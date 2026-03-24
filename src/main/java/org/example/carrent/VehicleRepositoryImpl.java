@@ -84,6 +84,9 @@ public class VehicleRepositoryImpl implements IVehicleRepository {
     public boolean remove(String id) {
         for (Vehicle v : vehicleList) {
             if (v.getId().equals(id)) {
+                if (v.isRented()) {
+                    return false;
+                }
                 vehicleList.remove(v);
                 save();
                 return true;
