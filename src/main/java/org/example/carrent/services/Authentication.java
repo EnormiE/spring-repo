@@ -1,6 +1,8 @@
-package org.example.carrent;
+package org.example.carrent.services;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.example.carrent.models.Role;
+import org.example.carrent.models.User;
 
 import java.util.Objects;
 

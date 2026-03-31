@@ -1,5 +1,7 @@
 package org.example.carrent;
 
+import org.example.carrent.models.User;
+import org.example.carrent.services.Authentication;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

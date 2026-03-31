@@ -1,5 +1,10 @@
 package org.example.carrent;
 
+import org.example.carrent.models.Role;
+import org.example.carrent.models.User;
+import org.example.carrent.models.Vehicle;
+import org.example.carrent.services.Authentication;
+
 import java.util.Scanner;
 
 public class UserInterface {

@@ -1,4 +1,4 @@
-package org.example.carrent;
+package org.example.carrent.models;
 
 public abstract class Vehicle {
     private String id;

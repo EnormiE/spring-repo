@@ -1,4 +1,7 @@
-package org.example.carrent;
+package org.example.carrent.impl;
+
+import org.example.carrent.models.Role;
+import org.example.carrent.models.User;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class UserRepository implements IUserRepository{
+public class UserRepository implements org.example.carrent.repositories.UserRepository {
 
     UserRepository() {
         load();

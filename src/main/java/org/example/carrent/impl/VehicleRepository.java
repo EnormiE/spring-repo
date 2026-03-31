@@ -1,4 +1,9 @@
-package org.example.carrent;
+package org.example.carrent.impl;
+
+import org.example.carrent.Car;
+import org.example.carrent.Motorcycle;
+import org.example.carrent.MotorcycleCategory;
+import org.example.carrent.models.Vehicle;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,11 +12,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class VehicleRepositoryImpl implements IVehicleRepository {
+public class VehicleRepository implements org.example.carrent.repositories.VehicleRepository {
 
     private List<Vehicle> vehicleList;
 
-    public VehicleRepositoryImpl() {
+    public VehicleRepository() {
         this.vehicleList = new ArrayList<>();
         load();
     }

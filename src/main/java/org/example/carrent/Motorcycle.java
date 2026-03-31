@@ -1,6 +1,8 @@
 package org.example.carrent;
 
-public class Motorcycle extends Vehicle{
+import org.example.carrent.models.Vehicle;
+
+public class Motorcycle extends Vehicle {
 //    public enum Kategoria {A, A1, A2, AM, B};
     MotorcycleCategory kategoria;
 
