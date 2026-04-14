@@ -1,4 +1,5 @@
 package org.example.carrent.models;
+
 import lombok.*;
 
 @Getter
@@ -6,10 +7,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(of = "id")
 @ToString
+@EqualsAndHashCode(of = "id")
 public class Rental {
-
     private String id;
     private String vehicleId;
     private String userId;
