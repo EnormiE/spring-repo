@@ -1,220 +1,293 @@
 package org.example.carrent;
 
-import org.example.carrent.models.Rental;
-import org.example.carrent.models.Role;
-import org.example.carrent.models.User;
-import org.example.carrent.models.Vehicle;
-import org.example.carrent.repositories.RentalRepository;
-import org.example.carrent.repositories.UserRepository;
-import org.example.carrent.repositories.VehicleRepository;
-import org.example.carrent.services.AuthService;
-import org.example.carrent.services.RentalService;
+import org.example.carrent.models.*;
+import org.example.carrent.services.*;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class UserInterface {
 
-    private final VehicleRepository vehicleRepo;
-    private final UserRepository userRepo;
-    private final RentalRepository rentalRepo;
     private final AuthService authService;
+    private final VehicleService vehicleService;
     private final RentalService rentalService;
-    private final Scanner scanner;
+    private final UserService userService;
+    private final VehicleCategoryConfigService categoryConfigService;
+    private final Scanner scanner = new Scanner(System.in);
 
-    public UserInterface(VehicleRepository vehicleRepo, UserRepository userRepo, RentalRepository rentalRepo,
-                         AuthService authService, RentalService rentalService) {
-        this.vehicleRepo = vehicleRepo;
-        this.userRepo = userRepo;
-        this.rentalRepo = rentalRepo;
+    public UserInterface(AuthService authService, VehicleService vehicleService, RentalService rentalService,
+              UserService userService, VehicleCategoryConfigService categoryConfigService) {
         this.authService = authService;
+        this.vehicleService = vehicleService;
         this.rentalService = rentalService;
-        this.scanner = new Scanner(System.in);
+        this.userService = userService;
+        this.categoryConfigService = categoryConfigService;
     }
 
     public void start() {
         while (true) {
-            System.out.println("\n--- MENU GŁÓWNE ---");
-            System.out.println("1. Zaloguj");
-            System.out.println("2. Zarejestruj");
-            System.out.println("0. Wyjście");
-            System.out.print("Wybierz opcję: ");
-            String choice = scanner.nextLine();
-
-            switch (choice) {
-                case "1":
-                    handleLogin();
-                    break;
-                case "2":
-                    handleRegister();
-                    break;
-                case "0":
-                    System.out.println("Zamykanie aplikacji...");
-                    return;
-                default:
-                    System.out.println("Nieprawidłowy wybór!");
-            }
-        }
-    }
-
-    private void handleLogin() {
-        System.out.print("Login: ");
-        String login = scanner.nextLine();
-        System.out.print("Hasło: ");
-        String password = scanner.nextLine();
-
-        Optional<User> userOpt = authService.login(login, password);
-
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (user.getRole() == Role.USER) {
-                userMenu(user);
-            } else if (user.getRole() == Role.ADMIN) {
-                adminMenu(user);
-            }
-        } else {
-            System.out.println("Błąd logowania: Nieprawidłowy login lub hasło.");
-        }
-    }
-
-    private void handleRegister() {
-        System.out.print("Podaj nowy login: ");
-        String login = scanner.nextLine();
-        System.out.print("Podaj nowe hasło: ");
-        String password = scanner.nextLine();
-
-        if (authService.register(login, password)) {
-            System.out.println("Rejestracja zakończona sukcesem! Możesz się teraz zalogować.");
-        } else {
-            System.out.println("Błąd: Użytkownik o takim loginie już istnieje.");
-        }
-    }
-
-    private void userMenu(User user) {
-        while (true) {
-            System.out.println("\nWitaj " + user.getLogin() + " (USER)!");
-            System.out.println("1. Wypożycz pojazd");
-            System.out.println("2. Zwróć pojazd");
-            System.out.println("3. Wyświetl swoje dane i aktualne wypożyczenie");
-            System.out.println("4. Pokaż dostępne pojazdy");
-            System.out.println("0. Wyloguj");
-            System.out.print("Wybierz opcję: ");
-            String select = scanner.nextLine();
-
-            switch (select) {
-                case "1":
-                    System.out.print("Podaj ID pojazdu do wypożyczenia: ");
-                    String idToRent = scanner.nextLine();
-                    if (rentalService.rentVehicle(idToRent, user.getId())) {
-                        System.out.println("Sukces: Wypożyczono pojazd!");
+            System.out.println("\n=== START ===\n1. Zaloguj\n2. Zarejestruj\n0. Koniec");
+            switch (scanner.nextLine().trim()) {
+                case "1" -> {
+                    User loggedUser = login();
+                    if (loggedUser != null) {
+                        System.out.println("Zalogowano: " + loggedUser.getLogin() + " (" + loggedUser.getRole() + ")");
+                        if (loggedUser.getRole() == Role.ADMIN) adminMenu(loggedUser);
+                        else userMenu(loggedUser);
                     } else {
-                        System.out.println("Niepowodzenie: Pojazd nie istnieje, jest zajęty, lub wystąpił błąd.");
+                        System.out.println("Nieprawidłowy login lub hasło.");
                     }
-                    break;
-                case "2":
-                    System.out.print("Podaj ID pojazdu do zwrotu: ");
-                    String idToReturn = scanner.nextLine();
-                    if (rentalService.returnVehicle(idToReturn)) {
-                        System.out.println("Sukces: Zwrócono pojazd!");
-                    } else {
-                        System.out.println("Niepowodzenie: Brak aktywnego wypożyczenia dla tego ID.");
-                    }
-                    break;
-                case "3":
-                    System.out.println("--- TWOJE DANE ---");
-                    System.out.println(user.toString());
-                    System.out.println("--- TWOJE AKTYWNE WYPOŻYCZENIA ---");
-                    rentalRepo.findAll().stream()
-                            .filter(r -> r.getUserId().equals(user.getId()) && r.isActive())
-                            .forEach(r -> {
-                                System.out.println(r.toString());
-                                vehicleRepo.findById(r.getVehicleId())
-                                        .ifPresent(v -> System.out.println("  -> Pojazd: " + v.toString()));
-                            });
-                    break;
-                case "4":
-                    System.out.println("--- DOSTĘPNE POJAZDY ---");
-                    for (Vehicle v : vehicleRepo.findAll()) {
-                        if (rentalRepo.findByVehicleIdAndReturnDateIsNull(v.getId()).isEmpty()) {
-                            System.out.println(v.toString());
-                        }
-                    }
-                    break;
-                case "0":
-                    return;
+                }
+                case "2" -> register();
+                case "0" -> { return; }
+                default -> System.out.println("Nieprawidłowa opcja.");
             }
         }
     }
 
-    private void adminMenu(User user) {
+    private void register() {
+        System.out.println("=== Rejestracja ===");
+        if (authService.register(readText("Podaj login: "), readText("Podaj hasło: "))) {
+            System.out.println("Zarejestrowano pomyślnie.");
+        } else {
+            System.out.println("Błąd rejestracji. Użytkownik prawdopodobnie już istnieje.");
+        }
+    }
+
+    private User login() {
+        System.out.println("=== Logowanie ===");
+        return authService.login(readText("Login: "), readText("Hasło: ")).orElse(null);
+    }
+
+    private void adminMenu(User loggedUser) {
         while (true) {
-            System.out.println("\nWitaj " + user.getLogin() + " (ADMIN)!");
-            System.out.println("1. Dodaj pojazd");
-            System.out.println("2. Usuń pojazd");
-            System.out.println("3. Przeglądaj wszystkie pojazdy");
-            System.out.println("4. Przeglądaj użytkowników");
-            System.out.println("0. Wyloguj");
-            System.out.print("Wybierz opcję: ");
-            String select = scanner.nextLine();
+            System.out.println("\n=== MENU ADMINA ===");
+            System.out.println("1. Pokaż pojazdy | 2. Dodaj pojazd | 3. Usuń pojazd | 4. Pokaż użytkowników | 5. Usuń użytkownika | 6. Moje dane | 7. Historia wypożyczeń | 0. Wyloguj");
 
-            switch (select) {
-                case "1":
-                    System.out.print("ID: ");
-                    String id = scanner.nextLine();
-                    System.out.print("Kategoria (np. CAR, MOTORCYCLE): ");
-                    String category = scanner.nextLine().toUpperCase();
-                    System.out.print("Marka: ");
-                    String brand = scanner.nextLine();
-                    System.out.print("Model: ");
-                    String model = scanner.nextLine();
-                    System.out.print("Rok: ");
-                    int year = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Cena: ");
-                    double price = Double.parseDouble(scanner.nextLine());
-
-                    Map<String, Object> attributes = new HashMap<>();
-                    if (category.equals("MOTORCYCLE")) {
-                        System.out.print("Kategoria prawa jazdy (np. A, A1): ");
-                        attributes.put("kategoria", scanner.nextLine());
-                    }
-
-                    Vehicle v = Vehicle.builder()
-                            .id(id)
-                            .category(category)
-                            .brand(brand)
-                            .model(model)
-                            .year(year)
-                            .price(price)
-                            .attributes(attributes)
-                            .build();
-
-                    vehicleRepo.save(v);
-                    System.out.println("Sukces: Dodano pojazd.");
-                    break;
-                case "2":
-                    System.out.print("Podaj ID pojazdu do usunięcia: ");
-                    String delId = scanner.nextLine();
-                    vehicleRepo.deleteById(delId);
-                    System.out.println("Wykonano (jeśli istniał, został usunięty).");
-                    break;
-                case "3":
-                    System.out.println("--- WSZYSTKIE POJAZDY ---");
-                    for (Vehicle veh : vehicleRepo.findAll()) {
-                        String status = rentalRepo.findByVehicleIdAndReturnDateIsNull(veh.getId()).isPresent() ? "[WYPOŻYCZONY]" : "[DOSTĘPNY]";
-                        System.out.println(status + " " + veh.toString() + " Atrybuty: " + veh.getAttributes());
-                    }
-                    break;
-                case "4":
-                    System.out.println("--- UŻYTKOWNICY ---");
-                    for (User u : userRepo.findAll()) {
-                        System.out.println(u.toString());
-                    }
-                    break;
-                case "0":
-                    return;
+            switch (scanner.nextLine().trim()) {
+                case "1" -> vehicleService.findAllVehicles().forEach(v ->
+                        System.out.println(v +
+                                " [Wypożyczony: " + vehicleService.isVehicleRented(v.getId()) + "]"
+                                + "[Wypożyczony: " +rentalService.vehicleHasActiveRental(v.getId()) + "]"));
+                case "2" -> addVehicle();
+                case "3" -> deleteVehicle();
+                case "4" -> showAllUsers();
+                case "5" -> deleteUser(loggedUser);
+                case "6" -> showCurrentUserData(loggedUser);
+                case "7" -> showRentalHistory();
+                case "0" -> { return; }
+                default -> System.out.println("Nieprawidłowa opcja.");
             }
         }
+    }
+
+    private void userMenu(User loggedUser) {
+        while (true) {
+            System.out.println("\n=== MENU USERA ===");
+            System.out.println("1. Dostępne pojazdy | 2. Wypożycz | 3. Zwróć | 4. Moje dane | 5. Moja historia | 0. Wyloguj");
+
+            switch (scanner.nextLine().trim()) {
+                case "1" -> vehicleService.findAvailableVehicles().forEach(System.out::println);
+                case "2" -> rentVehicle(loggedUser);
+                case "3" -> returnVehicle(loggedUser);
+                case "4" -> showCurrentUserData(loggedUser);
+                case "5" -> {
+                    List<Rental> rentals = rentalService.findUserRentals(loggedUser.getId());
+                    if (rentals.isEmpty()) System.out.println("Brak historii wypożyczeń.");
+                    else rentals.forEach(this::printRentalDetails);
+                }
+                case "0" -> { return; }
+                default -> System.out.println("Nieprawidłowa opcja.");
+            }
+        }
+    }
+
+    private void addVehicle() {
+        System.out.println("=== Dodawanie pojazdu ===");
+        List<VehicleCategoryConfig> categories = categoryConfigService.findAllCategories();
+        if (categories.isEmpty()) {
+            System.out.println("Brak skonfigurowanych kategorii pojazdów.");
+            return;
+        }
+
+        System.out.println("Dostępne kategorie:");
+        categories.forEach(c -> System.out.println("- " + c.getCategory()));
+
+        try {
+            VehicleCategoryConfig config = categoryConfigService.getByCategory(readText("Podaj kategorię: "));
+            Vehicle vehicle = Vehicle.builder()
+                    .id(UUID.randomUUID().toString())
+                    .category(config.getCategory())
+                    .brand(readText("Marka: "))
+                    .model(readText("Model: "))
+                    .year(readInt("Rok: "))
+                    .plate(readText("Rejestracja: "))
+                    .price(readDouble("Cena: "))
+                    .build();
+
+            for (Map.Entry<String, String> entry : config.getAttributes().entrySet()) {
+                vehicle.addAttribute(entry.getKey(), readAttributeValue(entry.getKey(), entry.getValue()));
+            }
+
+            System.out.println("Dodano pojazd o ID: " + vehicleService.addVehicle(vehicle).getId());
+        } catch (Exception e) {
+            System.out.println("Błąd: " + e.getMessage());
+        }
+    }
+
+    private void deleteVehicle() {
+        try {
+            vehicleService.removeVehicle(readText("ID pojazdu do usunięcia: "));
+            System.out.println("Usunięto pomyślnie.");
+        } catch (Exception e) {
+            System.out.println("Błąd: " + e.getMessage());
+        }
+    }
+
+    private void deleteUser(User loggedUser) {
+        try {
+            userService.deleteUser(readText("ID użytkownika do usunięcia: "), loggedUser.getId());
+            System.out.println("Użytkownik usunięty.");
+        } catch (Exception e) {
+            System.out.println("Błąd: " + e.getMessage());
+        }
+    }
+
+    private void showAllUsers() {
+        List<User> users = userService.findAllUsers();
+        if (users.isEmpty()) {
+            System.out.println("Brak użytkowników.");
+            return;
+        }
+
+        users.forEach(user -> {
+            System.out.println(user);
+            List<Rental> rentals = rentalService.findUserRentals(user.getId());
+
+            if (rentals.isEmpty()) {
+                System.out.println("  Historia wypożyczeń: brak\n--------------------");
+            } else {
+                System.out.println("  Historia wypożyczeń:");
+                rentals.forEach(this::printRentalDetails);
+            }
+        });
+    }
+
+    private void rentVehicle(User loggedUser) {
+        try {
+            rentalService.rentVehicle(loggedUser.getId(), readText("ID pojazdu do wypożyczenia: "));
+            System.out.println("Pojazd został wypożyczony.");
+        } catch (Exception e) {
+            System.out.println("Błąd: " + e.getMessage());
+        }
+    }
+
+    private void returnVehicle(User loggedUser) {
+        try {
+            rentalService.returnVehicle(loggedUser.getId());
+            System.out.println("Pojazd został zwrócony.");
+        } catch (Exception e) {
+            System.out.println("Błąd: " + e.getMessage());
+        }
+    }
+
+    private void showCurrentUserData(User loggedUser) {
+        try {
+            User u = userService.findById(loggedUser.getId()).get();
+            System.out.println("ID: " + u.getId() + " | Login: " + u.getLogin() + " | Rola: " + u.getRole());
+
+            rentalService.findActiveRentalByUserId(u.getId())
+                    .ifPresentOrElse(
+                            rental -> {
+                                try {
+                                    System.out.println("Aktualnie wypożyczony pojazd: " + vehicleService.findById(rental.getVehicleId()));
+                                } catch (Exception e) {
+                                    System.out.println("Aktualnie wypożyczony pojazd: " + rental.getVehicleId() + " (brak szczegółów)");
+                                }
+                            },
+                            () -> System.out.println("Brak aktywnego wypożyczenia.")
+                    );
+        } catch (Exception e) {
+            System.out.println("Nie udało się odczytać danych użytkownika.");
+        }
+    }
+
+    private void showRentalHistory() {
+        List<Rental> rentals = rentalService.findAllRentals();
+        if (rentals.isEmpty()) {
+            System.out.println("Brak historii wypożyczeń.");
+            return;
+        }
+        rentals.forEach(this::printRentalDetails);
+    }
+
+    private String readText(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (!input.isEmpty()) return input;
+            System.out.println("To pole nie może być puste!");
+        }
+    }
+
+    private int readInt(String prompt) {
+        while (true) {
+            try {
+                return Integer.parseInt(readText(prompt));
+            } catch (NumberFormatException e) {
+                System.out.println("Wpisz poprawną liczbę całkowitą!");
+            }
+        }
+    }
+
+    private double readDouble(String prompt) {
+        while (true) {
+            try {
+                double val = Double.parseDouble(readText(prompt));
+                if (val >= 0) return val;
+                System.out.println("Wartość nie może być ujemna!");
+            } catch (NumberFormatException e) {
+                System.out.println("Wpisz poprawną liczbę!");
+            }
+        }
+    }
+
+    private boolean readBoolean(String prompt) {
+        while (true) {
+            String input = readText(prompt).toLowerCase();
+            if (input.equals("true")) return true;
+            if (input.equals("false")) return false;
+            System.out.println("Wpisz 'true' lub 'false'.");
+        }
+    }
+
+    private Object readAttributeValue(String attrName, String attrType) {
+        return switch (attrType.toLowerCase()) {
+            case "string" -> readText(attrName + " (tekst): ");
+            case "number" -> readDouble(attrName + " (liczba): ");
+            case "boolean" -> readBoolean(attrName + " (true/false): ");
+            case "integer" -> readInt(attrName + " (liczba calkowita): ");
+            default -> throw new IllegalArgumentException("Nieznany typ: " + attrType);
+        };
+    }
+
+    private void printRentalDetails(Rental rental) {
+        System.out.println(rental);
+
+        String login = "nieznany";
+        try {
+            login = userService.findById(rental.getUserId()).get().getLogin();
+        } catch (Exception ignored) {}
+
+        String vehicle = "nieznany";
+        try {
+            vehicle = vehicleService.findById(rental.getVehicleId()).toString();
+        } catch (Exception ignored) {}
+
+        System.out.println("  user: " + login);
+        System.out.println("  vehicle: " + vehicle);
+        System.out.println("--------------------");
     }
 }
