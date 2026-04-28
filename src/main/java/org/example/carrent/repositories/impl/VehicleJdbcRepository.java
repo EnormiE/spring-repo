@@ -34,7 +34,7 @@ public class VehicleJdbcRepository implements VehicleRepository {
                 vehicles.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while reading vehicles", e);
+            throw new RuntimeException("Error occurred while reading vehicles" + e, e);
         }
 
         return vehicles;
@@ -54,7 +54,7 @@ public class VehicleJdbcRepository implements VehicleRepository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while finding vehicle by id", e);
+            throw new RuntimeException("Error occurred while finding vehicle by id" + e, e);
         }
         return Optional.empty();
     }
@@ -63,7 +63,7 @@ public class VehicleJdbcRepository implements VehicleRepository {
     public Vehicle save(Vehicle vehicle) {
         String sql = """
                 INSERT INTO vehicle (id, category, brand, model, year, plate, price, attributes) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb)) 
                 ON CONFLICT(id) DO UPDATE SET 
                     category = excluded.category, 
                     brand = excluded.brand, 
@@ -86,13 +86,13 @@ public class VehicleJdbcRepository implements VehicleRepository {
             stmt.setDouble(7, vehicle.getPrice());
 
             // map to json
-            String attrJson = gson.toJson(vehicle.getAttributes());
+            String attrJson = gson.toJson(vehicle.getAttributes() != null ? vehicle.getAttributes() : new HashMap<>());
             stmt.setString(8, attrJson);
 
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while saving vehicle", e);
+            throw new RuntimeException("Error occurred while saving vehicle" + e, e);
         }
         return vehicle;
     }
@@ -108,7 +108,7 @@ public class VehicleJdbcRepository implements VehicleRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while deleting vehicle", e);
+            throw new RuntimeException("Error occurred while deleting vehicle" + e, e);
         }
     }
 
