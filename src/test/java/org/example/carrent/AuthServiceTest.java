@@ -2,7 +2,7 @@ package org.example.carrent;
 
 import org.example.carrent.models.User;
 import org.example.carrent.repositories.UserRepository;
-import org.example.carrent.services.AuthService;
+import org.example.carrent.services.SimpleAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AuthServiceTest {
 
     private UserRepository userRepository;
-    private AuthService authService;
+    private SimpleAuthService authService;
 
     @BeforeEach
     void setUp() {
@@ -30,7 +30,7 @@ public class AuthServiceTest {
             @Override public User save(User user) { users.add(user); return user; }
             @Override public void deleteById(String id) {}
         };
-        authService = new AuthService(userRepository);
+        authService = new SimpleAuthService(userRepository);
 
         authService.register("admin", "admin123");
     }

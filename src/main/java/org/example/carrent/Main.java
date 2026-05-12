@@ -9,6 +9,11 @@ import org.example.carrent.services.*;
 
 public class Main {
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("ustaw env: json, jdbc lub hibernate");
+            return;
+        }
+
         if (args[0].equals("json")) {
             System.out.println("repo: JSON");
 
@@ -16,15 +21,15 @@ public class Main {
             UserRepository userRepo = new UserJsonRepository();
             RentalRepository rentalRepo = new RentalJsonRepository();
 
-            AuthService authService = new AuthService(userRepo);
-            RentalService rentalService = new RentalService(vehicleRepo, rentalRepo);
+            SimpleAuthService authService = new SimpleAuthService(userRepo);
+            SimpleRentalService rentalService = new SimpleRentalService(vehicleRepo, rentalRepo);
 
             VehicleCategoryConfigRepository configRepo = new VehicleCategoryConfigJsonRepository();
             VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
             VehicleValidator validator = new VehicleValidator(configService);
 
-            VehicleService vehicleService = new VehicleService(validator,vehicleRepo, rentalService);
-            UserService userService = new UserService(userRepo, rentalService);
+            SimpleVehicleService vehicleService = new SimpleVehicleService(validator, vehicleRepo, rentalService);
+            SimpleUserService userService = new SimpleUserService(userRepo, rentalService);
 
             UserInterface ui = new UserInterface(authService, vehicleService, rentalService, userService, configService);
             ui.start();
@@ -35,15 +40,35 @@ public class Main {
             UserRepository userRepo = new UserJdbcRepository();
             RentalRepository rentalRepo = new RentalJdbcRepository();
 
-            AuthService authService = new AuthService(userRepo);
-            RentalService rentalService = new RentalService(vehicleRepo, rentalRepo);
+            SimpleAuthService authService = new SimpleAuthService(userRepo);
+            SimpleRentalService rentalService = new SimpleRentalService(vehicleRepo, rentalRepo);
 
             VehicleCategoryConfigRepository configRepo = new VehicleCategoryConfigJsonRepository();
             VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
             VehicleValidator validator = new VehicleValidator(configService);
 
-            VehicleService vehicleService = new VehicleService(validator,vehicleRepo, rentalService);
-            UserService userService = new UserService(userRepo, rentalService);
+            SimpleVehicleService vehicleService = new SimpleVehicleService(validator, vehicleRepo, rentalService);
+            SimpleUserService userService = new SimpleUserService(userRepo, rentalService);
+
+            UserInterface ui = new UserInterface(authService, vehicleService, rentalService, userService, configService);
+            ui.start();
+        }
+        else if (args[0].equals("hibernate")) {
+            System.out.println("repo: HIBERNATE");
+
+            RentalHibernateRepository rentalRepo = new RentalHibernateRepository();
+            VehicleHibernateRepository vehicleRepo = new VehicleHibernateRepository();
+            UserHibernateRepository userRepo = new UserHibernateRepository();
+
+            AuthServiceInterface authService = new AuthHibernateService(userRepo);
+            RentalServiceInterface rentalService = new RentalHibernateService(rentalRepo, vehicleRepo, userRepo);
+
+            VehicleCategoryConfigRepository configRepo = new VehicleCategoryConfigJsonRepository();
+            VehicleCategoryConfigService configService = new VehicleCategoryConfigService(configRepo);
+            VehicleValidator validator = new VehicleValidator(configService);
+
+            VehicleServiceInterface vehicleService = new VehicleHibernateService(validator, vehicleRepo, rentalService);
+            UserServiceInterface userService = new UserHibernateService(userRepo, rentalService);
 
             UserInterface ui = new UserInterface(authService, vehicleService, rentalService, userService, configService);
             ui.start();

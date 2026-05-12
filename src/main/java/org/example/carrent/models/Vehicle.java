@@ -1,22 +1,36 @@
 package org.example.carrent.models;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
 import lombok.*;
-import java.util.*;
+import org.hibernate.annotations.Type;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode(of = "id")
+@Entity
+@Table(name = "vehicle")
 public class Vehicle {
+    @Id
+    @Column(nullable = false, unique = true)
     private String id;
     private String category;
     private String brand;
     private String model;
     private int year;
     private String plate;
+
+    @Column(columnDefinition = "NUMERIC")
     private double price;
 
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Map<String, Object> attributes = new HashMap<>();

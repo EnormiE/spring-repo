@@ -1,6 +1,7 @@
 package org.example.carrent.services;
 
 import org.example.carrent.models.Rental;
+import org.example.carrent.models.User;
 import org.example.carrent.models.Vehicle;
 import org.example.carrent.repositories.RentalRepository;
 import org.example.carrent.repositories.VehicleRepository;
@@ -10,19 +11,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-public class RentalService {
+public class SimpleRentalService implements RentalServiceInterface{
 
     private final VehicleRepository vehicleRepository;
     private final RentalRepository rentalRepository;
 
-    public RentalService(VehicleRepository vehicleRepository, RentalRepository rentalRepository) {
+    public SimpleRentalService(VehicleRepository vehicleRepository, RentalRepository rentalRepository) {
         this.vehicleRepository = vehicleRepository;
         this.rentalRepository = rentalRepository;
     }
 
-    public void rentVehicle(String userId, String vehicleId) throws Exception {
+    public Rental rentVehicle(String userId, String vehicleId) throws Exception {
         Optional<Vehicle> vehicleOpt = vehicleRepository.findById(vehicleId);
         if (vehicleOpt.isEmpty()) {
             throw new Exception("Brak pojazdu o takim ID");
@@ -38,16 +38,17 @@ public class RentalService {
 
         Rental rental = Rental.builder()
                 .id(UUID.randomUUID().toString())
-                .vehicleId(vehicleId)
-                .userId(userId)
+                .vehicle(vehicleOpt.get())
+                .user(User.builder().id(userId).build()) // obiekt user z samym id - bo błędy
                 .rentDateTime(LocalDateTime.now().toString())
                 .returnDateTime(null)
                 .build();
 
         rentalRepository.save(rental);
+        return rental;
     }
 
-    public void returnVehicle(String userId) throws Exception {
+    public Rental returnVehicle(String userId) throws Exception {
         Optional<Rental> activeRental = findActiveRentalByUserId(userId);
 
         if (activeRental.isEmpty()) {
@@ -56,6 +57,7 @@ public class RentalService {
         Rental rental = activeRental.get();
         rental.setReturnDateTime(LocalDateTime.now().toString());
         rentalRepository.save(rental);
+        return rental;
     }
 
     public boolean vehicleHasActiveRental(String id) {
@@ -65,6 +67,11 @@ public class RentalService {
 
     public List<Rental> findUserRentals(String id) {
         return rentalRepository.findAll().stream().filter(rental -> Objects.equals(rental.getUserId(), id)).toList();
+    }
+
+    @Override
+    public boolean userHasActiveRental(String userId) {
+        return findActiveRentalByUserId(userId).isPresent();
     }
 
     public Optional<Rental> findActiveRentalByUserId(String id) {

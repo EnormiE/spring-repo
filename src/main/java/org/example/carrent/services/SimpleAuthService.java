@@ -8,11 +8,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.util.Optional;
 import java.util.UUID;
 
-public class AuthService {
+public class SimpleAuthService implements AuthServiceInterface {
 
     private final UserRepository userRepository;
 
-    public AuthService(UserRepository userRepository) {
+    public SimpleAuthService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

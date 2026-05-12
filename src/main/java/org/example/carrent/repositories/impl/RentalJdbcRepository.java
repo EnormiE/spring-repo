@@ -2,6 +2,8 @@ package org.example.carrent.repositories.impl;
 
 import org.example.carrent.JdbcConnectionManager;
 import org.example.carrent.models.Rental;
+import org.example.carrent.models.User;
+import org.example.carrent.models.Vehicle;
 import org.example.carrent.repositories.RentalRepository;
 
 import java.sql.Connection;
@@ -118,9 +120,8 @@ public class RentalJdbcRepository implements RentalRepository {
     private Rental mapRow(ResultSet rs) throws SQLException {
         return Rental.builder()
                 .id(rs.getString("id"))
-                .vehicleId(rs.getString("vehicle_id"))
-                .userId(rs.getString("user_id"))
-                // map to var
+                .vehicle(Vehicle.builder().id(rs.getString("vehicle_id")).build())
+                .user(User.builder().id(rs.getString("user_id")).build())
                 .rentDateTime(rs.getString("rent_date"))
                 .returnDateTime(rs.getString("return_date"))
                 .build();

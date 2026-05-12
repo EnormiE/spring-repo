@@ -4,18 +4,16 @@ import org.example.carrent.models.Vehicle;
 import org.example.carrent.repositories.VehicleRepository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public class VehicleService {
+public class SimpleVehicleService implements VehicleServiceInterface{
 
     private final VehicleValidator vehicleValidator;
     private final VehicleRepository vehicleRepository;
-    private final RentalService rentalService;
+    private final SimpleRentalService rentalService;
 
 
-    public VehicleService(VehicleValidator vehicleValidator, VehicleRepository vehicleRepository, RentalService rentalService) {
+    public SimpleVehicleService(VehicleValidator vehicleValidator, VehicleRepository vehicleRepository, SimpleRentalService rentalService) {
         this.vehicleValidator = vehicleValidator;
         this.vehicleRepository = vehicleRepository;
         this.rentalService = rentalService;
@@ -34,7 +32,7 @@ public class VehicleService {
         return vehicleRepository.findById(id);
     }
 
-    public Boolean isVehicleRented(String id) {
+    public boolean isVehicleRented(String id) {
         return rentalService.vehicleHasActiveRental(id);
     }
 

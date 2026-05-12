@@ -10,15 +10,15 @@ import java.util.UUID;
 
 public class UserInterface {
 
-    private final AuthService authService;
-    private final VehicleService vehicleService;
-    private final RentalService rentalService;
-    private final UserService userService;
+    private final AuthServiceInterface authService;
+    private final VehicleServiceInterface vehicleService;
+    private final RentalServiceInterface rentalService;
+    private final UserServiceInterface userService;
     private final VehicleCategoryConfigService categoryConfigService;
     private final Scanner scanner = new Scanner(System.in);
 
-    public UserInterface(AuthService authService, VehicleService vehicleService, RentalService rentalService,
-              UserService userService, VehicleCategoryConfigService categoryConfigService) {
+    public UserInterface(AuthServiceInterface authService, VehicleServiceInterface vehicleService, RentalServiceInterface rentalService,
+                         UserServiceInterface userService, VehicleCategoryConfigService categoryConfigService) {
         this.authService = authService;
         this.vehicleService = vehicleService;
         this.rentalService = rentalService;

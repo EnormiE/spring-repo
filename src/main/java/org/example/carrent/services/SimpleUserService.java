@@ -2,19 +2,17 @@ package org.example.carrent.services;
 
 import org.example.carrent.models.Role;
 import org.example.carrent.models.User;
-import org.example.carrent.models.Vehicle;
 import org.example.carrent.repositories.UserRepository;
-import org.example.carrent.repositories.VehicleRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public class UserService {
+public class SimpleUserService implements UserServiceInterface{
 
     private final UserRepository userRepository;
-    private final RentalService rentalService;
+    private final SimpleRentalService rentalService;
 
-    public UserService(UserRepository userRepository, RentalService rentalService) {
+    public SimpleUserService(UserRepository userRepository, SimpleRentalService rentalService) {
         this.userRepository = userRepository;
         this.rentalService = rentalService;
     }
