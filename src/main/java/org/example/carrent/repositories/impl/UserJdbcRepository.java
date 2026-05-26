@@ -94,6 +94,10 @@ public class UserJdbcRepository implements UserRepository {
 
     @Override
     public User save(User user) {
+        if (user.getId() == null || user.getId().isBlank()) {
+            user.setId(java.util.UUID.randomUUID().toString());
+        }
+
         String sql = """
                 INSERT INTO users (id, login, password_hash, role) 
                 VALUES (?, ?, ?, ?) 

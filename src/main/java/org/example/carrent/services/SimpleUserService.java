@@ -22,7 +22,7 @@ public class SimpleUserService implements UserServiceInterface {
     }
 
     public User addUser(User user) {
-        userRepository.save(user);
+        user = userRepository.save(user);
         return user;
     }
 

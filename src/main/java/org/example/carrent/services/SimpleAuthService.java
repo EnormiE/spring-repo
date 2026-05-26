@@ -36,7 +36,7 @@ public class SimpleAuthService implements AuthServiceInterface {
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
         User newUser = User.builder()
-                .id(UUID.randomUUID().toString())
+//                .id(UUID.randomUUID().toString())
                 .login(login)
                 .passwordHash(hashedPassword)
                 .role(Role.USER)

@@ -25,7 +25,7 @@ public class SimpleVehicleService implements VehicleServiceInterface {
 
     public Vehicle addVehicle(Vehicle vehicle) {
         vehicleValidator.validate(vehicle);
-        vehicleRepository.save(vehicle);
+        vehicle = vehicleRepository.save(vehicle);
         return vehicle;
     }
 

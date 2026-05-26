@@ -41,14 +41,14 @@ public class SimpleRentalService implements RentalServiceInterface {
         }
 
         Rental rental = Rental.builder()
-                .id(UUID.randomUUID().toString())
+//                .id(UUID.randomUUID().toString())
                 .vehicle(vehicleOpt.get())
                 .user(User.builder().id(userId).build())
                 .rentDateTime(LocalDateTime.now().toString())
                 .returnDateTime(null)
                 .build();
 
-        rentalRepository.save(rental);
+        rental = rentalRepository.save(rental);
         return rental;
     }
 

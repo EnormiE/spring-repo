@@ -44,6 +44,10 @@ public class VehicleJsonRepository implements VehicleRepository {
 
     @Override
     public Vehicle save(Vehicle vehicle) {
+        if (vehicle.getId() == null || vehicle.getId().isBlank()) {
+            vehicle.setId(java.util.UUID.randomUUID().toString());
+        }
+
         Vehicle copy = vehicle.copy();
         vehicles.removeIf(v -> v.getId().equals(copy.getId()));
         vehicles.add(copy);

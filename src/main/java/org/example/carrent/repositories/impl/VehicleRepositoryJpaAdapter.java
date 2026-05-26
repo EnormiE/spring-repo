@@ -30,6 +30,9 @@ public class VehicleRepositoryJpaAdapter implements VehicleRepository {
 
     @Override
     public Vehicle save(Vehicle vehicle) {
+        if (vehicle.getId() == null || vehicle.getId().isBlank()) {
+            vehicle.setId(java.util.UUID.randomUUID().toString());
+        }
         return delegate.save(vehicle);
     }
 

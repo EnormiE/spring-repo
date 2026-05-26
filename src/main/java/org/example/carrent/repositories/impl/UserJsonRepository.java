@@ -52,6 +52,10 @@ public class UserJsonRepository implements UserRepository {
 
     @Override
     public User save(User user) {
+        if (user.getId() == null || user.getId().isBlank()) {
+            user.setId(java.util.UUID.randomUUID().toString());
+        }
+
         User copy = user.copy();
         users.removeIf(u -> u.getId().equals(copy.getId()));
         users.add(copy);

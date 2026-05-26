@@ -44,6 +44,10 @@ public class RentalJsonRepository implements RentalRepository {
 
     @Override
     public Rental save(Rental rental) {
+        if (rental.getId() == null || rental.getId().isBlank()) {
+            rental.setId(java.util.UUID.randomUUID().toString());
+        }
+
         Rental copy = rental.copy();
         rentals.removeIf(r -> r.getId().equals(copy.getId()));
         rentals.add(copy);
