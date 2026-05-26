@@ -6,6 +6,7 @@ import org.example.carrent.models.Vehicle;
 import org.example.carrent.repositories.VehicleRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Type;
@@ -32,15 +33,18 @@ public class VehicleJdbcRepository implements VehicleRepository {
         List<Vehicle> vehicles = new ArrayList<>();
         String sql = "SELECT id, category, brand, model, year, plate, price, attributes FROM vehicle";
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql);
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 vehicles.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while reading vehicles" + e, e);
+            throw new RuntimeException("Error occurred while reading vehicles", e);
+        } finally {
+            DataSourceUtils.releaseConnection(connection, dataSource);
         }
 
         return vehicles;
@@ -49,19 +53,22 @@ public class VehicleJdbcRepository implements VehicleRepository {
     @Override
     public Optional<Vehicle> findById(String id) {
         String sql = "SELECT id, category, brand, model, year, plate, price, attributes FROM vehicle WHERE id = ?";
+        Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, id);
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(mapRow(rs));
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while finding vehicle by id" + e, e);
+            throw new RuntimeException("Error occurred while finding vehicle by id", e);
+        } finally {
+            DataSourceUtils.releaseConnection(connection, dataSource);
         }
+
         return Optional.empty();
     }
 
@@ -80,8 +87,9 @@ public class VehicleJdbcRepository implements VehicleRepository {
                     attributes = excluded.attributes
                 """;
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, vehicle.getId());
             stmt.setString(2, vehicle.getCategory());
@@ -97,23 +105,26 @@ public class VehicleJdbcRepository implements VehicleRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while saving vehicle" + e, e);
+            throw new RuntimeException("Error occurred while saving vehicle", e);
+        } finally {
+            DataSourceUtils.releaseConnection(connection, dataSource);
         }
+
         return vehicle;
     }
 
     @Override
     public void deleteById(String id) {
         String sql = "DELETE FROM vehicle WHERE id = ?";
+        Connection connection = DataSourceUtils.getConnection(dataSource);
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, id);
             stmt.executeUpdate();
-
         } catch (SQLException e) {
-            throw new RuntimeException("Error occurred while deleting vehicle" + e, e);
+            throw new RuntimeException("Error occurred while deleting vehicle", e);
+        } finally {
+            DataSourceUtils.releaseConnection(connection, dataSource);
         }
     }
 
