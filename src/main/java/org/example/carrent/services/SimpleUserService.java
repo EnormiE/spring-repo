@@ -3,11 +3,15 @@ package org.example.carrent.services;
 import org.example.carrent.models.Role;
 import org.example.carrent.models.User;
 import org.example.carrent.repositories.UserRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
-public class SimpleUserService implements UserServiceInterface{
+@Service
+@Transactional
+public class SimpleUserService implements UserServiceInterface {
 
     private final UserRepository userRepository;
     private final SimpleRentalService rentalService;
@@ -21,36 +25,32 @@ public class SimpleUserService implements UserServiceInterface{
         userRepository.save(user);
         return user;
     }
+
+    @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findById(String id) {
         return userRepository.findById(id);
     }
 
-    public void deleteUser(String toDeleteId, String whoRequestedId) throws Exception {
-        // jesli jedyny admin, to nie moze sie usunac
+    public void deleteUser(String toDeleteId, String whoRequestedId) throws IllegalStateException {
         if (findById(toDeleteId).get().getRole().equals(Role.ADMIN)) {
             if (findAllUsers().stream().filter(user -> user.getRole().equals(Role.ADMIN)).count() < 2) {
-                throw new Exception("W systemie musi zostać CONAJMNIEJ 1 administrator");
+                throw new IllegalStateException("W systemie musi zostać CONAJMNIEJ 1 administrator");
             }
         }
-        // nie kasuj użytkownika, który ma wypożyczony pojazd
         if (rentalService.findActiveRentalByUserId(toDeleteId).isPresent()) {
-            throw new Exception("Nie można usunąć użytkownika, który  ma wypożyczony pojazd");
+            throw new IllegalStateException("Nie można usunąć użytkownika, który ma wypożyczony pojazd");
         }
-        // sam siebie mozesz usunac
         if (toDeleteId.equals(whoRequestedId)) {
             userRepository.deleteById(toDeleteId);
-            // TO DO: wyloguj użytkownika
-        }
-        else {
-            // admin moze usuwac innych
+        } else {
             if (findById(whoRequestedId).get().getRole().equals(Role.ADMIN)) {
                 userRepository.deleteById(toDeleteId);
             }
-            return;
         }
     }
 }

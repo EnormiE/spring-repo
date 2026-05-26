@@ -2,9 +2,11 @@ package org.example.carrent.services;
 
 import org.example.carrent.models.Vehicle;
 import org.example.carrent.models.VehicleCategoryConfig;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class VehicleValidator {
 
     private final VehicleCategoryConfigService configService;

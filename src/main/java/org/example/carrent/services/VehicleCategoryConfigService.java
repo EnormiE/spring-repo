@@ -2,9 +2,13 @@ package org.example.carrent.services;
 
 import org.example.carrent.models.VehicleCategoryConfig;
 import org.example.carrent.repositories.VehicleCategoryConfigRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Service
+@Transactional(readOnly = true)
 public class VehicleCategoryConfigService {
 
     private final VehicleCategoryConfigRepository configRepository;
@@ -26,4 +30,3 @@ public class VehicleCategoryConfigService {
         return configRepository.findByCategory(category).isPresent();
     }
 }
-

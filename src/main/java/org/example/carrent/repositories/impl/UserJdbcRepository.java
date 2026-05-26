@@ -1,10 +1,12 @@
 package org.example.carrent.repositories.impl;
 
-import org.example.carrent.JdbcConnectionManager;
 import org.example.carrent.models.Role;
 import org.example.carrent.models.User;
 import org.example.carrent.repositories.UserRepository;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,14 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
+@Profile("jdbc")
 public class UserJdbcRepository implements UserRepository {
+
+    private final DataSource dataSource;
+
+    public UserJdbcRepository(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @Override
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT id, login, password_hash, role FROM users";
 
-        try (Connection connection = JdbcConnectionManager.getInstance().getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -38,7 +48,7 @@ public class UserJdbcRepository implements UserRepository {
     public Optional<User> findById(String id) {
         String sql = "SELECT id, login, password_hash, role FROM users WHERE id = ?";
 
-        try (Connection connection = JdbcConnectionManager.getInstance().getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, id);
@@ -57,7 +67,7 @@ public class UserJdbcRepository implements UserRepository {
     public Optional<User> findByLogin(String login) {
         String sql = "SELECT id, login, password_hash, role FROM users WHERE login = ?";
 
-        try (Connection connection = JdbcConnectionManager.getInstance().getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, login);
@@ -83,7 +93,7 @@ public class UserJdbcRepository implements UserRepository {
                     role = excluded.role
                 """;
 
-        try (Connection connection = JdbcConnectionManager.getInstance().getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, user.getId());
@@ -103,7 +113,7 @@ public class UserJdbcRepository implements UserRepository {
     public void deleteById(String id) {
         String sql = "DELETE FROM users WHERE id = ?";
 
-        try (Connection connection = JdbcConnectionManager.getInstance().getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, id);
