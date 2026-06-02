@@ -35,7 +35,7 @@ public class RentalJdbcRepository implements RentalRepository {
                 "v.category, v.brand, v.model, v.year, v.plate, v.price, " +
                 "u.login, u.password_hash, u.role " +
                 "FROM rental r " +
-                "JOIN vehicles v ON r.vehicle_id = v.id " +
+                "JOIN vehicle v ON r.vehicle_id = v.id " +
                 "JOIN users u ON r.user_id = u.id";
 
         Connection connection = DataSourceUtils.getConnection(dataSource);
@@ -61,7 +61,7 @@ public class RentalJdbcRepository implements RentalRepository {
                 "v.category, v.brand, v.model, v.year, v.plate, v.price, " +
                 "u.login, u.password_hash, u.role " +
                 "FROM rental r " +
-                "JOIN vehicles v ON r.vehicle_id = v.id " +
+                "JOIN vehicle v ON r.vehicle_id = v.id " +
                 "JOIN users u ON r.user_id = u.id " +
                 "WHERE r.id = ?";
 
@@ -143,7 +143,7 @@ public class RentalJdbcRepository implements RentalRepository {
                 "v.category, v.brand, v.model, v.year, v.plate, v.price, " +
                 "u.login, u.password_hash, u.role " +
                 "FROM rental r " +
-                "JOIN vehicles v ON r.vehicle_id = v.id " +
+                "JOIN vehicle v ON r.vehicle_id = v.id " +
                 "JOIN users u ON r.user_id = u.id " +
                 "WHERE r.vehicle_id = ? AND (r.return_date IS NULL OR r.return_date = '')";
 
@@ -181,7 +181,7 @@ public class RentalJdbcRepository implements RentalRepository {
                         .id(rs.getString("user_id"))
                         .login(rs.getString("login"))
                         .passwordHash(rs.getString("password_hash"))
-                        .role(rs.getString("role") != null ? Role.valueOf(rs.getString("role")) : null)
+                        .role(rs.getString("role") != null ? Role.valueOf(rs.getString("role").toUpperCase()) : null)
                         .build())
                 .rentDateTime(rs.getString("rent_date"))
                 .returnDateTime(rs.getString("return_date"))
