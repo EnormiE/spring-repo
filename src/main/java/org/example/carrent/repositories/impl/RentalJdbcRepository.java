@@ -1,6 +1,7 @@
 package org.example.carrent.repositories.impl;
 
 import org.example.carrent.models.Rental;
+import org.example.carrent.models.Role;
 import org.example.carrent.models.User;
 import org.example.carrent.models.Vehicle;
 import org.example.carrent.repositories.RentalRepository;
@@ -30,7 +31,12 @@ public class RentalJdbcRepository implements RentalRepository {
     @Override
     public List<Rental> findAll() {
         List<Rental> rentals = new ArrayList<>();
-        String sql = "SELECT id, vehicle_id, user_id, rent_date, return_date FROM rental";
+        String sql = "SELECT r.id, r.vehicle_id, r.user_id, r.rent_date, r.return_date, " +
+                "v.category, v.brand, v.model, v.year, v.plate, v.price, " +
+                "u.login, u.password_hash, u.role " +
+                "FROM rental r " +
+                "JOIN vehicles v ON r.vehicle_id = v.id " +
+                "JOIN users u ON r.user_id = u.id";
 
         Connection connection = DataSourceUtils.getConnection(dataSource);
 
@@ -51,7 +57,13 @@ public class RentalJdbcRepository implements RentalRepository {
 
     @Override
     public Optional<Rental> findById(String id) {
-        String sql = "SELECT id, vehicle_id, user_id, rent_date, return_date FROM rental WHERE id = ?";
+        String sql = "SELECT r.id, r.vehicle_id, r.user_id, r.rent_date, r.return_date, " +
+                "v.category, v.brand, v.model, v.year, v.plate, v.price, " +
+                "u.login, u.password_hash, u.role " +
+                "FROM rental r " +
+                "JOIN vehicles v ON r.vehicle_id = v.id " +
+                "JOIN users u ON r.user_id = u.id " +
+                "WHERE r.id = ?";
 
         Connection connection = DataSourceUtils.getConnection(dataSource);
 
@@ -127,7 +139,13 @@ public class RentalJdbcRepository implements RentalRepository {
 
     @Override
     public Optional<Rental> findByVehicleIdAndReturnDateIsNull(String vehicleId) {
-        String sql = "SELECT id, vehicle_id, user_id, rent_date, return_date FROM rental WHERE vehicle_id = ? AND (return_date IS NULL OR return_date = '')";
+        String sql = "SELECT r.id, r.vehicle_id, r.user_id, r.rent_date, r.return_date, " +
+                "v.category, v.brand, v.model, v.year, v.plate, v.price, " +
+                "u.login, u.password_hash, u.role " +
+                "FROM rental r " +
+                "JOIN vehicles v ON r.vehicle_id = v.id " +
+                "JOIN users u ON r.user_id = u.id " +
+                "WHERE r.vehicle_id = ? AND (r.return_date IS NULL OR r.return_date = '')";
 
         Connection connection = DataSourceUtils.getConnection(dataSource);
 
@@ -150,8 +168,21 @@ public class RentalJdbcRepository implements RentalRepository {
     private Rental mapRow(ResultSet rs) throws SQLException {
         return Rental.builder()
                 .id(rs.getString("id"))
-                .vehicle(Vehicle.builder().id(rs.getString("vehicle_id")).build())
-                .user(User.builder().id(rs.getString("user_id")).build())
+                .vehicle(Vehicle.builder()
+                        .id(rs.getString("vehicle_id"))
+                        .category(rs.getString("category"))
+                        .brand(rs.getString("brand"))
+                        .model(rs.getString("model"))
+                        .year(rs.getInt("year"))
+                        .plate(rs.getString("plate"))
+                        .price(rs.getDouble("price"))
+                        .build())
+                .user(User.builder()
+                        .id(rs.getString("user_id"))
+                        .login(rs.getString("login"))
+                        .passwordHash(rs.getString("password_hash"))
+                        .role(rs.getString("role") != null ? Role.valueOf(rs.getString("role")) : null)
+                        .build())
                 .rentDateTime(rs.getString("rent_date"))
                 .returnDateTime(rs.getString("return_date"))
                 .build();
