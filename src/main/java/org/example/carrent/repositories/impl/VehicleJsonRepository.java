@@ -20,7 +20,8 @@ public class VehicleJsonRepository implements VehicleRepository {
     private final List<Vehicle> vehicles;
 
     public VehicleJsonRepository() {
-        Type type = new TypeToken<List<Vehicle>>(){}.getType();
+        Type type = new TypeToken<List<Vehicle>>() {
+        }.getType();
         this.storage = new JsonFileStorage<>("vehicles.json", type);
         this.vehicles = storage.load();
     }

@@ -20,7 +20,8 @@ public class UserJsonRepository implements UserRepository {
     private final List<User> users;
 
     public UserJsonRepository() {
-        Type type = new TypeToken<List<User>>(){}.getType();
+        Type type = new TypeToken<List<User>>() {
+        }.getType();
         this.storage = new JsonFileStorage<>("users.json", type);
         this.users = storage.load();
     }

@@ -21,7 +21,8 @@ import java.util.*;
 public class VehicleJdbcRepository implements VehicleRepository {
 
     private final Gson gson = new Gson();
-    private final Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+    private final Type mapType = new TypeToken<Map<String, Object>>() {
+    }.getType();
     private final DataSource dataSource;
 
     public VehicleJdbcRepository(DataSource dataSource) {
@@ -73,7 +74,7 @@ public class VehicleJdbcRepository implements VehicleRepository {
     }
 
     @Override
-        public Vehicle save(Vehicle vehicle) {
+    public Vehicle save(Vehicle vehicle) {
         if (vehicle.getId() == null || vehicle.getId().isBlank()) {
             vehicle.setId(java.util.UUID.randomUUID().toString());
         }

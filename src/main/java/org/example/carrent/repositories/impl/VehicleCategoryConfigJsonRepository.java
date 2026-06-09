@@ -15,7 +15,8 @@ public class VehicleCategoryConfigJsonRepository implements VehicleCategoryConfi
 
     private final JsonFileStorage<VehicleCategoryConfig> storage =
             new JsonFileStorage<>("categories.json",
-                    new TypeToken<List<VehicleCategoryConfig>>() {}.getType());
+                    new TypeToken<List<VehicleCategoryConfig>>() {
+                    }.getType());
 
     private final List<VehicleCategoryConfig> configs;
 

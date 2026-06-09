@@ -20,7 +20,8 @@ public class RentalJsonRepository implements RentalRepository {
     private final List<Rental> rentals;
 
     public RentalJsonRepository() {
-        Type type = new TypeToken<List<Rental>>(){}.getType();
+        Type type = new TypeToken<List<Rental>>() {
+        }.getType();
         this.storage = new JsonFileStorage<>("rentals.json", type);
         this.rentals = storage.load();
     }
