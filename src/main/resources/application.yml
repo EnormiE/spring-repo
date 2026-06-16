@@ -3,8 +3,9 @@ spring:
     active: ${APP_PROFILE:json}
   main:
     banner-mode: off
-  server:
-    port: ${PORT:8080}
+    
+server:
+  port: ${PORT:8080}
 
 jwt:
   secret: ${JWT_SECRET}
