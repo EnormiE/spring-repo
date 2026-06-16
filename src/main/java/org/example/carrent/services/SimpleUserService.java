@@ -36,6 +36,11 @@ public class SimpleUserService implements UserServiceInterface {
         return userRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public User findByLogin(String login) {
+        return userRepository.findByLogin(login).orElse(null);
+    }
+
     public void deleteUser(String toDeleteId, String whoRequestedId) throws IllegalStateException {
         if (findById(toDeleteId).get().getRole().equals(Role.ADMIN)) {
             if (findAllUsers().stream().filter(user -> user.getRole().equals(Role.ADMIN)).count() < 2) {

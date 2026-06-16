@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface VehicleCategoryConfigRepository {
     List<VehicleCategoryConfig> findAll();
+
     Optional<VehicleCategoryConfig> findByCategory(String category);
 }
 

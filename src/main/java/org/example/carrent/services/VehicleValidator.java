@@ -62,6 +62,7 @@ public class VehicleValidator {
             }
         });
     }
+
     private void requireNonBlank(String value, String message) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(message);

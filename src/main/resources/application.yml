@@ -5,6 +5,10 @@ spring:
     banner-mode: off
   server:
     port: ${PORT:8080}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:3600000}
+
 
 carrent:
   json:

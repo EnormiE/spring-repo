@@ -11,5 +11,7 @@ public interface UserServiceInterface {
 
     Optional<User> findById(String id);
 
+    User findByLogin(String login);
+
     void deleteUser(String id, String loggedUserId) throws Exception;
 }
