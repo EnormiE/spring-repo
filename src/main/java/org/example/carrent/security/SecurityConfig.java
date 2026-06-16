@@ -37,6 +37,9 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/vehicles/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories/**").permitAll()
 
+                        // zalogowany
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/me").authenticated()
+
                         // admin
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users").hasRole("ADMIN")
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/vehicles").hasRole("ADMIN")
@@ -45,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/{id}").hasRole("ADMIN")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/rentals/users/**").hasRole("ADMIN")
 
-                        // dla zalogowanego - wszystkie pozostałe
+                        // zalogowany
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

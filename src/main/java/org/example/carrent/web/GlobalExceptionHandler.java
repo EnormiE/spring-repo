@@ -13,19 +13,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> badRequest(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", e.getMessage()));
+                .body(Map.of("error", "Bad Request: " + e.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, String>> conflict(IllegalStateException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", e.getMessage()));
+                .body(Map.of("error", "Conflict: " + e.getMessage()));
     }
 
-    // Opcjonalny fallback na wypadek innych, niezłapanych błędów
+    // fallback
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> internalServerError(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Wystąpił błąd serwera: " + e.getMessage()));
+                .body(Map.of("error", "Internal Server Error: " + e.getMessage()));
     }
 }
